@@ -1,0 +1,82 @@
+olist-data-warehouse-bi-v2/
+|-- .env.example
+|-- .gitignore
+|-- README.md
+|-- requirements.txt
+|-- tree.txt
+|
+|-- dashboard/
+|   |-- app.py
+|   |-- db.py
+|   |-- components.py
+|   |-- charts.py
+|   `-- pages/
+|       |-- 1_Executive_Overview.py
+|       |-- 2_Sales_Performance.py
+|       |-- 3_Delivery_Satisfaction.py
+|       |-- 4_Marketing_Funnel.py
+|       `-- 5_Data_Quality.py
+|
+|-- data/
+|   |-- raw/
+|   |   |-- .gitkeep
+|   |   |-- olist_closed_deals_dataset.csv
+|   |   |-- olist_customers_dataset.csv
+|   |   |-- olist_geolocation_dataset.csv
+|   |   |-- olist_marketing_qualified_leads_dataset.csv
+|   |   |-- olist_order_items_dataset.csv
+|   |   |-- olist_order_payments_dataset.csv
+|   |   |-- olist_order_reviews_dataset.csv
+|   |   |-- olist_orders_dataset.csv
+|   |   |-- olist_products_dataset.csv
+|   |   `-- olist_sellers_dataset.csv
+|   `-- warehouse/
+|       |-- .gitkeep
+|       `-- olist_dwh.sqlite
+|
+|-- docs/
+|   |-- dashboard_report.md
+|   |-- data_model.md
+|   |-- data_quality_report.md
+|   |-- etl_pipeline.md
+|   `-- project_context.md
+|
+|-- screenshots/
+|   |-- 01_landing_page_project_overview.png
+|   |-- 02_executive_overview_kpis.png
+|   |-- 03_executive_overview_revenue_orders_trends.png
+|   |-- 04_executive_overview_reviews_lead_conversion_trends.png
+|   |-- 05_sales_performance_kpis.png
+|   |-- 06_sales_category_seller_revenue.png
+|   |-- 07_sales_customer_state_payment_methods.png
+|   |-- 08_delivery_satisfaction_kpis.png
+|   |-- 09_delivery_late_vs_state_delay.png
+|   |-- 10_delivery_review_distribution_low_categories.png
+|   |-- 11_marketing_funnel_kpis.png
+|   |-- 12_marketing_origin_conversion_delay.png
+|   |-- 13_marketing_segments_revenue_sales_team.png
+|   |-- 14_data_quality_kpis.png
+|   |-- 15_data_quality_rows_by_source_and_model.png
+|   |-- 16_data_quality_relationship_duplicates_missing.png
+|   |-- 17_data_quality_etl_sql_checks.png
+|   |-- 18_terminal_etl_success.png
+|   |-- 19_terminal_validation_success.png
+|   `-- 20_terminal_project_tree.png
+|
+|-- scripts/
+|   `-- validate_project.py
+|
+|-- sql/
+|   `-- create_schema.sql
+|
+`-- src/
+    |-- __init__.py
+    |-- run_etl.py
+    |-- extract/
+    |   `-- __init__.py
+    |-- load/
+    |   `-- __init__.py
+    |-- quality/
+    |   `-- __init__.py
+    `-- transform/
+        `-- __init__.py
