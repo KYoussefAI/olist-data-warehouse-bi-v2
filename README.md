@@ -1,28 +1,46 @@
 # Olist E-commerce BI Pipeline
 
-Projet BI / Data Engineering basé sur les données Olist. L'objectif est de transformer des fichiers CSV bruts en un Data Warehouse analytique SQLite, puis de présenter les indicateurs dans un rapport Streamlit multi-page.
+Projet BI / Data Engineering construit autour des donnees publiques Olist. Le projet transforme des fichiers CSV bruts en Data Warehouse analytique SQLite, puis expose les indicateurs dans un dashboard Streamlit multi-page.
 
-## Objectif du projet
+## Objectif
 
-Le projet suit une chaîne décisionnelle simple et adaptée à un contexte universitaire :
+Mettre en place une chaine decisionnelle complete et lisible :
 
 ```text
 Sources CSV Olist
-↓
+        |
+        v
 ETL Python
-↓
+        |
+        v
 Data Warehouse SQLite
-↓
-Rapport BI Streamlit
+        |
+        v
+Dashboard BI Streamlit
 ```
 
-## Problématique
+## Problematique metier
 
-Comment Olist peut-elle exploiter ses données de commandes, paiements, avis clients, produits, vendeurs et leads marketing pour suivre la performance commerciale, la qualité de livraison, la satisfaction client et l'efficacité de l'acquisition de vendeurs ?
+Comment Olist peut-elle exploiter ses donnees de commandes, paiements, avis clients, produits, vendeurs et leads marketing pour suivre :
 
-## Sources attendues dans `data/raw/`
+- la performance commerciale ;
+- la qualite de livraison ;
+- la satisfaction client ;
+- l'efficacite de l'acquisition de vendeurs.
 
-Fichiers principaux :
+## Fonctionnalites principales
+
+- Pipeline ETL Python depuis les fichiers CSV Olist.
+- Data Warehouse SQLite avec dimensions, faits et vues analytiques.
+- Deux processus metier modelises : commandes e-commerce et conversion marketing.
+- Dashboard Streamlit multi-page avec KPIs, filtres et visualisations Plotly.
+- Rapport qualite genere par l'ETL.
+- Script de validation du projet.
+- Documentation technique dans `docs/`.
+
+## Sources attendues
+
+Les fichiers suivants doivent etre places dans `data/raw/` :
 
 ```text
 olist_orders_dataset.csv
@@ -42,15 +60,22 @@ Fichier optionnel :
 product_category_name_translation.csv
 ```
 
-Si le fichier de traduction des catégories est absent, l'ETL continue et utilise les noms de catégories originaux comme libellés d'analyse. Le rapport qualité indique alors `0` ligne pour cette source et ajoute une note `missing_optional_using_original_category_names`.
+Si le fichier de traduction des categories est absent, l'ETL continue et utilise les noms de categories originaux comme libelles d'analyse. Le rapport qualite indique alors `0` ligne pour cette source et ajoute la note `missing_optional_using_original_category_names`.
 
-Le fichier `olist_geolocation_dataset.csv` n'est pas utilisé dans cette première version afin de garder le modèle simple. Les villes et États présents dans les dimensions client et vendeur suffisent pour les analyses demandées.
+Le fichier `olist_geolocation_dataset.csv` n'est pas utilise dans cette version afin de garder le modele simple. Les villes et Etats deja presents dans les dimensions client et vendeur suffisent pour les analyses du dashboard.
 
 ## Installation
 
 ```bash
 python -m venv .venv
-source .venv/bin/activate  # Windows: .venv\Scripts\activate
+source .venv/bin/activate
+pip install -r requirements.txt
+```
+
+Sous Windows :
+
+```bash
+.venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
@@ -60,7 +85,7 @@ pip install -r requirements.txt
 python -m src.run_etl --raw-data-dir data/raw --warehouse-path data/warehouse/olist_dwh.sqlite
 ```
 
-Le script crée ou remplace :
+Le script cree ou remplace :
 
 ```text
 data/warehouse/olist_dwh.sqlite
@@ -73,14 +98,32 @@ docs/data_quality_report.md
 streamlit run dashboard/app.py
 ```
 
-## Modèle Data Warehouse
+Le dashboard lit par defaut le Data Warehouse SQLite genere dans :
 
-Le modèle conserve uniquement deux tables de faits :
+```text
+data/warehouse/olist_dwh.sqlite
+```
 
-1. `fact_order_performance` : performance des commandes au grain article de commande.
-2. `fact_lead_conversion` : conversion marketing au grain MQL.
+## Valider le projet
 
-Les paiements sont agrégés au niveau commande avant allocation aux lignes d'articles. Les avis clients sont aussi agrégés au niveau commande pour éviter de dupliquer les reviews.
+```bash
+python scripts/validate_project.py
+```
+
+Le script verifie :
+
+- les imports des helpers du dashboard ;
+- les tables obligatoires du Data Warehouse ;
+- les vues SQL `vw_sales_monthly`, `vw_category_performance` et `vw_lead_funnel`.
+
+## Modele Data Warehouse
+
+Le modele conserve deux tables de faits afin de rester clair et coherent avec les processus metier :
+
+| Table | Grain | Usage |
+|---|---|---|
+| `fact_order_performance` | Une ligne par article vendu dans une commande | Ventes, livraison, satisfaction, vendeurs, categories, paiements |
+| `fact_lead_conversion` | Une ligne par marketing qualified lead | Acquisition vendeurs, conversion, origines marketing, segments business |
 
 Dimensions principales :
 
@@ -99,27 +142,26 @@ dim_lead_profile
 dim_sales_team
 ```
 
-## Pages du rapport Streamlit
+Les paiements sont agreges au niveau commande avant allocation aux lignes d'articles. Les avis clients sont aussi agreges au niveau commande pour eviter de dupliquer les reviews.
 
-- `Executive Overview` : synthèse des KPIs et évolution mensuelle.
-- `Sales Performance` : revenus par catégorie, vendeur, État client et paiement.
-- `Delivery & Satisfaction` : retard de livraison, délais, notes clients et catégories sensibles.
-- `Marketing Funnel` : MQL, conversion par origine/segment et performance commerciale.
-- `Data Quality` : contrôles ETL, lignes chargées, relations, doublons et valeurs manquantes.
+## Pages du dashboard
 
-## Validation
+| Page | Contenu |
+|---|---|
+| Landing Page | Contexte, problematique, architecture et navigation |
+| Executive Overview | KPIs globaux, revenus, commandes, avis clients et conversion des leads |
+| Sales Performance | Revenus par categorie, vendeur, Etat client et mode de paiement |
+| Delivery & Satisfaction | Retards, delais, notes clients et categories sensibles |
+| Marketing Funnel | MQL, conversion, origines, segments, equipes commerciales |
+| Data Quality | Lignes chargees, controles ETL, relations, doublons et valeurs manquantes |
 
-Après l'ETL, lancer :
+## Documentation
 
-```bash
-python scripts/validate_project.py
-```
-
-Le script vérifie :
-
-- les imports des helpers du dashboard ;
-- les tables obligatoires du Data Warehouse ;
-- les vues SQL `vw_sales_monthly`, `vw_category_performance` et `vw_lead_funnel`.
+- [Contexte projet](docs/project_context.md)
+- [Pipeline ETL](docs/etl_pipeline.md)
+- [Modele de donnees](docs/data_model.md)
+- [Rapport dashboard](docs/dashboard_report.md)
+- [Rapport qualite](docs/data_quality_report.md)
 
 ## Structure du projet
 
@@ -131,12 +173,17 @@ olist-data-warehouse-bi-v2/
 |   |-- components.py
 |   |-- charts.py
 |   `-- pages/
+|       |-- 1_Executive_Overview.py
+|       |-- 2_Sales_Performance.py
+|       |-- 3_Delivery_Satisfaction.py
+|       |-- 4_Marketing_Funnel.py
+|       `-- 5_Data_Quality.py
 |-- data/
 |   |-- raw/
 |   `-- warehouse/
 |-- docs/
-|-- scripts/
 |-- screenshots/
+|-- scripts/
 |-- sql/
 |-- src/
 `-- requirements.txt
@@ -144,4 +191,56 @@ olist-data-warehouse-bi-v2/
 
 ## Screenshots
 
-Les captures d'écran du rapport peuvent être ajoutées dans `screenshots/`.
+### Landing Page
+
+![Landing page - project overview](screenshots/01_landing_page_project_overview.png)
+
+### Executive Overview
+
+![Executive overview - KPIs](screenshots/02_executive_overview_kpis.png)
+
+![Executive overview - revenue and orders trends](screenshots/03_executive_overview_revenue_orders_trends.png)
+
+![Executive overview - reviews and lead conversion trends](screenshots/04_executive_overview_reviews_lead_conversion_trends.png)
+
+### Sales Performance
+
+![Sales performance - KPIs](screenshots/05_sales_performance_kpis.png)
+
+![Sales performance - category and seller revenue](screenshots/06_sales_category_seller_revenue.png)
+
+![Sales performance - customer state and payment methods](screenshots/07_sales_customer_state_payment_methods.png)
+
+### Delivery & Satisfaction
+
+![Delivery and satisfaction - KPIs](screenshots/08_delivery_satisfaction_kpis.png)
+
+![Delivery and satisfaction - late delivery and state delay](screenshots/09_delivery_late_vs_state_delay.png)
+
+![Delivery and satisfaction - review distribution and low categories](screenshots/10_delivery_review_distribution_low_categories.png)
+
+### Marketing Funnel
+
+![Marketing funnel - KPIs](screenshots/11_marketing_funnel_kpis.png)
+
+![Marketing funnel - origin conversion and delay](screenshots/12_marketing_origin_conversion_delay.png)
+
+![Marketing funnel - segments, revenue and sales team](screenshots/13_marketing_segments_revenue_sales_team.png)
+
+### Data Quality
+
+![Data quality - KPIs](screenshots/14_data_quality_kpis.png)
+
+![Data quality - rows by source and model](screenshots/15_data_quality_rows_by_source_and_model.png)
+
+![Data quality - relationships, duplicates and missing values](screenshots/16_data_quality_relationship_duplicates_missing.png)
+
+![Data quality - ETL and SQL checks](screenshots/17_data_quality_etl_sql_checks.png)
+
+### Execution et validation
+
+![Terminal - ETL success](screenshots/18_terminal_etl_success.png)
+
+![Terminal - validation success](screenshots/19_terminal_validation_success.png)
+
+![Terminal - project tree](screenshots/20_terminal_project_tree.png)
